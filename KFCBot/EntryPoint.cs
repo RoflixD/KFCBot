@@ -8,7 +8,7 @@ namespace KFCBot
         public static void Main(string[] args) 
         {
             MeTelegramBot bot = new MeTelegramBot();
-            bot.Start();           
+            bot.Start();            
         }
     }
 }
