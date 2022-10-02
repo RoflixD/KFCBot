@@ -1,11 +1,15 @@
-﻿using System;
+﻿#region SystemIncludes
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+#endregion
+#region TelegramIncludes
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
-using Telegram.Bot.Exceptions;
-using System.Collections.Generic;
+#endregion
+
 
 namespace KFCBot.src.MeTelegramBot
 {
@@ -52,7 +56,11 @@ namespace KFCBot.src.MeTelegramBot
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            if (!AllChats.Contains(update.Message.Chat)) 
+            if (update.Message == null)
+            {
+                return;
+            }
+            if (!AllChats.Contains(update.Message?.Chat)) 
             {
                 AllChats.Add(update.Message.Chat);
             }
@@ -84,11 +92,12 @@ namespace KFCBot.src.MeTelegramBot
             foreach(var cmd in BotProps.Commands)
             {
                 if (cmd.IsCommand(command))
-                {
-                    Console.WriteLine("Yes, I can do it!");
+                {                    
                     cmd.Execute();
+                    ProcessCommand(Console.ReadLine());
                 }
-            }            
+            }
+            Console.WriteLine("Can't find this command!");
             ProcessCommand(Console.ReadLine());
         } 
     }

@@ -6,7 +6,7 @@ namespace KFCBot.src.MeTelegramBot
 {
     public static class BotProps
     {
-        public static List<CommonCommand> Commands = new List<CommonCommand>()
+        public static List<BaseCommand> Commands = new List<BaseCommand>()
         {
             new WriteToAll(),
         };
