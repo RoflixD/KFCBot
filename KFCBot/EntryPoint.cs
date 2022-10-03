@@ -1,5 +1,10 @@
 ﻿using KFCBot.src.MeTelegramBot;
-using System;
+/*
+ * TODO:
+ * #1 Abstract ReadWrite operations
+ * #1 Add admints flag to users list file
+ * #1 mb add abstraction for users
+ */
 
 namespace KFCBot
 {

@@ -8,16 +8,16 @@ using System.Collections.Generic;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
+using System.IO;
 #endregion
-
 
 namespace KFCBot.src.MeTelegramBot
 {
     class MeTelegramBot
     {
-        public static ITelegramBotClient BotClient { get; set; }
-        public static List<Chat> AllChats = new List<Chat>();
+        public static string UsersListPath = "";
 
+        public static ITelegramBotClient BotClient { get; set; }
         public void Start()
         {
             Console.WriteLine("Enter the password:");
@@ -54,25 +54,28 @@ namespace KFCBot.src.MeTelegramBot
             }
         }
 
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             if (update.Message == null)
             {
                 return;
             }
-            if (!AllChats.Contains(update.Message?.Chat)) 
-            {
-                AllChats.Add(update.Message.Chat);
-            }
+           
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
-                var message = update.Message;
-                if (message.Text.ToLower() == "/start")
+                if (update.Message.NewChatMembers != null)
                 {
-                    await botClient.SendTextMessageAsync(message.Chat, "Добро пожаловать на борт, добрый путник!");
-                    return;
-                }
-                await botClient.SendTextMessageAsync(message.Chat, "Привет-привет!!");
+                    NewUser(update);
+                }                
+                foreach (var botCommand in BotProps.BotCommands)
+                {
+                    if (botCommand.IsCommand(update.Message.Text.ToLower()))
+                    {
+                        botCommand.Execute(update);
+                        return;
+                    }
+                }                               
+                await botClient.SendTextMessageAsync(update.Message.Chat, "Ниче не понял");
             }
         }
 
@@ -99,6 +102,30 @@ namespace KFCBot.src.MeTelegramBot
             }
             Console.WriteLine("Can't find this command!");
             ProcessCommand(Console.ReadLine());
-        } 
+        }
+
+        //#1
+        private void NewUser(Update update)
+        {
+            Console.WriteLine($"New user has been conected!\n" +
+                        $"Id: {update.Id}; First Name: {update.Message.Chat.FirstName}; LastName: {update.Message.Chat.LastName} \n");
+
+            if (!System.IO.File.Exists("Users.txt"))
+            {
+                Console.WriteLine("Have no users file! Creating it and write new user id in it!");
+                using (StreamWriter sw = System.IO.File.CreateText("Users.txt"))
+                {
+                    sw.WriteLine(update.Message.Chat.Id.ToString());
+                }
+            }
+            else
+            {
+                Console.WriteLine("File already exist! Just adding new user id in it!");
+                using (StreamWriter sw = System.IO.File.AppendText("Users.txt"))
+                {
+                    sw.WriteLine(update.Message.Chat.Id.ToString());
+                }
+            }
+        }
     }
 }
