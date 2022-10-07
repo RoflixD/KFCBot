@@ -8,34 +8,26 @@ namespace KFCBot.src.MeTelegramBot
 {
     public class WriteToAll : BaseConsoleCommand
     {
+        private static string FilePath = "Users.txt";
+
         public override async void Execute()
         {
+            List<string> usersId = FileWorker.ReadFrom(FilePath);
             Console.WriteLine("Ready to write! Just type your message!");
             var msg = Console.ReadLine();
-            if (!File.Exists("Users.txt"))
+            foreach(var id in usersId)
             {
-                Console.WriteLine("Have no users file. There's no users it the chat or something wrong with writing func!");
-                return;
-            }
-            using (StreamReader sr = new StreamReader("Users.txt"))
-            {
-                string s = "";
-                while((s = sr.ReadLine()) != null)
+                long sendToId;
+                if (long.TryParse(id, out sendToId))
                 {
-                    try
-                    {
-                        long chatId = long.Parse(s);
-                        await MeTelegramBot.BotClient.SendTextMessageAsync(chatId, msg);
-                        Console.WriteLine("Done!");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Somthing went wrong while I was trying send message to all memebers in the chat!");
-                        Console.WriteLine(ex.ToString());
-                        return;
-                    }
+                    await MeTelegramBot.BotClient.SendTextMessageAsync(sendToId, msg);
                 }
-            }            
+                else
+                {
+                    Console.WriteLine("Error!");
+                    continue;
+                }
+            }
         }
 
         public override bool IsCommand(string str)

@@ -14,9 +14,7 @@ using System.IO;
 namespace KFCBot.src.MeTelegramBot
 {
     class MeTelegramBot
-    {
-        public static string UsersListPath = "";
-
+    { 
         public static ITelegramBotClient BotClient { get; set; }
         public void Start()
         {
@@ -103,28 +101,20 @@ namespace KFCBot.src.MeTelegramBot
             Console.WriteLine("Can't find this command!");
             ProcessCommand(Console.ReadLine());
         }
-
-        //#1
+        
         private void NewUser(Update update)
         {
             Console.WriteLine($"New user has been conected!\n" +
                         $"Id: {update.Id}; First Name: {update.Message.Chat.FirstName}; LastName: {update.Message.Chat.LastName} \n");
 
-            if (!System.IO.File.Exists("Users.txt"))
+            if (!FileWorker.IsFileExist("User.txt"))
             {
-                Console.WriteLine("Have no users file! Creating it and write new user id in it!");
-                using (StreamWriter sw = System.IO.File.CreateText("Users.txt"))
+                if (!FileWorker.CreateFile("User.txt"))
                 {
-                    sw.WriteLine(update.Message.Chat.Id.ToString());
+                    Console.WriteLine("Something went wrong while I was trying create file!");
+                    return;
                 }
-            }
-            else
-            {
-                Console.WriteLine("File already exist! Just adding new user id in it!");
-                using (StreamWriter sw = System.IO.File.AppendText("Users.txt"))
-                {
-                    sw.WriteLine(update.Message.Chat.Id.ToString());
-                }
+                FileWorker.WriteFile("Users.txt", update.Message.Chat.Id.ToString());
             }
         }
     }
